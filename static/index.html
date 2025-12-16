@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职能沟通翻译助手 - Communication Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .mode-btn:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .mode-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .input-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .input-box {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .translate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .translate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .translate-btn:active {
+            transform: translateY(0);
+        }
+
+        .translate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .result-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 2.0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        /* 使用伪元素高亮 section 标题 [xxx] */
+        .result-box {
+            /* 使用 CSS 变量来存储颜色 */
+            --section-color: #667eea;
+        }
+        
+        .result-box h3 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* Section 标题特殊样式 */
+        .result-box .section-title {
+            color: #4a5568;
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            padding-left: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-box ul, .result-box ol {
+            margin-left: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .result-box p {
+            margin-bottom: 10px;
+        }
+
+        .result-box.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .status-badge.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-badge.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-badge.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .examples {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .examples h4 {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .example-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .example-item:hover {
+            background: #e3f2fd;
+        }
+
+        /* 历史记录样式 */
+        .history-btn {
+            margin-left: 10px;
+            padding: 12px 24px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .history-modal.show {
+            display: flex;
+        }
+
+        .history-content {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-header {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .history-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .history-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .history-body {
+            padding: 20px 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .history-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: box-shadow 0.3s;
+        }
+
+        .history-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-item-mode {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .history-item-time {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .history-item-input {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #495057;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .history-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-item-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .history-item-btn.use {
+            background: #667eea;
+            color: white;
+        }
+
+        .history-item-btn.use:hover {
+            background: #5568d3;
+        }
+
+        .history-item-btn.delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .history-item-btn.delete:hover {
+            background: #c82333;
+        }
+
+        .history-footer {
+            padding: 15px 30px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-count {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .history-clear-btn {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .history-clear-btn:hover {
+            background: #c82333;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>职能沟通翻译助手</h1>
+            <p>帮助产品经理和开发工程师更好地相互理解</p>
+        </header>
+
+        <div class="main-content">
+            <!-- 模式选择 -->
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="auto">
+                    自动识别
+                </button>
+                <button class="mode-btn" data-mode="pm:dev">
+                    产品 → 开发
+                </button>
+                <button class="mode-btn" data-mode="dev:pm">
+                    开发 → 产品
+                </button>
+                <button class="mode-btn" data-mode="operation:dev">
+                    运营 → 开发
+                </button>
+                <button class="mode-btn" data-mode="pm:operation">
+                    产品 → 运营
+                </button>
+                <button class="mode-btn" data-mode="management:pm">
+                    管理 → 产品
+                </button>
+                <button class="mode-btn" data-mode="dev:management">
+                    开发 → 管理
+                </button>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <label for="input-text">输入内容：</label>
+                <textarea 
+                    id="input-text" 
+                    class="input-box" 
+                    placeholder="请输入您的内容...&#10;&#10;示例（产品视角）：我们需要一个智能推荐功能，提升用户停留时长&#10;&#10;示例（开发视角）：我们优化了数据库查询，QPS从1000提升到1300"
+                ></textarea>
+            </div>
+
+            <!-- 翻译按钮 -->
+            <div style="display: flex; align-items: center;">
+                <button id="translate-btn" class="translate-btn">
+                    开始翻译
+                </button>
+                <button id="history-btn" class="history-btn">
+                    历史记录
+                </button>
+            </div>
+
+            <!-- 结果区域 -->
+            <div class="result-section" id="result-section" style="display: none;">
+                <h3>翻译结果</h3>
+                <div id="result-status"></div>
+                <div id="result-box" class="result-box empty">
+                    等待翻译...
+                </div>
+            </div>
+
+            <!-- 示例 -->
+            <div class="examples">
+                <h4>快速测试示例：</h4>
+                <div class="example-item" onclick="fillExample(0)">
+                    产品需求：我们需要一个智能推荐功能，提升用户停留时长
+                </div>
+                <div class="example-item" onclick="fillExample(1)">
+                    技术方案：数据库查询优化，QPS从1000提升到1300，响应时间降低75%
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Powered by Skill-as-Prompts Architecture | GLM-4.6
+        </footer>
+    </div>
+
+    <!-- 历史记录弹窗 -->
+    <div id="history-modal" class="history-modal">
+        <div class="history-content">
+            <div class="history-header">
+                <h2>翻译历史</h2>
+                <button id="history-close" class="history-close">×</button>
+            </div>
+            <div class="history-body" id="history-body">
+                <div class="history-empty">
+                    <p>暂无翻译历史</p>
+                    <p style="font-size: 12px; margin-top: 10px;">开始翻译后，历史记录会自动保存</p>
+                </div>
+            </div>
+            <div class="history-footer">
+                <div class="history-count" id="history-count">共 0 条记录</div>
+                <button id="history-clear" class="history-clear-btn">清空历史</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 示例数据
+        const examples = [
+            "我们需要一个智能推荐功能，根据用户行为实时推荐相关内容，提升用户停留时长",
+            "我们对数据库查询进行了优化，使用了Redis缓存和索引优化，QPS从1000提升到了1300，响应时间从200ms降到了50ms"
+        ];
+
+        // 当前模式
+        let currentMode = 'auto';
+
+        // DOM元素
+        const inputText = document.getElementById('input-text');
+        const translateBtn = document.getElementById('translate-btn');
+        const resultSection = document.getElementById('result-section');
+        const resultBox = document.getElementById('result-box');
+        const resultStatus = document.getElementById('result-status');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+
+        // 模式切换
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+            });
+        });
+
+        // 填充示例
+        function fillExample(index) {
+            inputText.value = examples[index];
+            inputText.focus();
+        }
+
+        // 最终格式化：给section标题添加样式，并调整间距
+        function finalFormatResult() {
+            let content = resultBox.textContent;
+            
+            // 将连续的多个空行压缩为一个空行
+            content = content.replace(/\n{3,}/g, '\n\n');
+            
+            // 将 [section标题] 转换为带样式的HTML
+            const lines = content.split('\n');
+            const htmlLines = lines.map(line => {
+                // 如果是section标题（单独一行的[xxx]）
+                if (/^\[.+\]$/.test(line.trim())) {
+                    return `<h3 class="section-title">${escapeHtml(line)}</h3>`;
+                }
+                return escapeHtml(line);
+            });
+            
+            resultBox.innerHTML = htmlLines.join('\n');
+        }
+        
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 格式化结果显示
+        function formatResult() {
+            let content = resultBox.textContent;
+            
+            // 将 [section] 标记转换为 HTML
+            content = content.replace(/\[([^\]]+)\]/g, '<h3>$1</h3>');
+            
+            // 将列表标记转换为 HTML
+            const lines = content.split('\n');
+            let formattedLines = [];
+            let inList = false;
+            
+            for (let line of lines) {
+                const trimmed = line.trim();
+                
+                // 处理列表项
+                if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                    if (!inList) {
+                        formattedLines.push('<ul>');
+                        inList = true;
+                    }
+                    formattedLines.push('<li>' + trimmed.substring(2) + '</li>');
+                } else if (trimmed.match(/^\d+\.\s/)) {
+                    if (!inList) {
+                        formattedLines.push('<ol>');
+                        inList = true;
+                    }
+                    formattedLines.push('<li>' + trimmed.replace(/^\d+\.\s/, '') + '</li>');
+                } else {
+                    if (inList) {
+                        formattedLines.push(inList === 'ul' ? '</ul>' : '</ol>');
+                        inList = false;
+                    }
+                    if (trimmed) {
+                        formattedLines.push('<p>' + line + '</p>');
+                    } else {
+                        formattedLines.push('<br>');
+                    }
+                }
+            }
+            
+            if (inList) {
+                formattedLines.push('</ul>');
+            }
+            
+            resultBox.innerHTML = formattedLines.join('');
+        }
+
+        // 翻译函数
+        async function translate() {
+            const text = inputText.value.trim();
+
+            if (!text) {
+                alert('请输入内容');
+                return;
+            }
+
+            if (text.length < 5) {
+                alert('输入内容过短，至少需要5个字符');
+                return;
+            }
+
+            // 显示结果区域
+            resultSection.style.display = 'block';
+            resultBox.classList.remove('empty');
+            resultBox.textContent = '';
+
+            // 显示加载状态
+            resultStatus.innerHTML = '<span class="status-badge info"><span class="loading"></span>翻译中...</span>';
+
+            // 禁用按钮
+            translateBtn.disabled = true;
+            translateBtn.textContent = '翻译中...';
+
+            // 解析角色组合
+            let sourceRole = null;
+            let targetRole = null;
+            if (currentMode !== 'auto') {
+                const [source, target] = currentMode.split(':');
+                sourceRole = source;
+                targetRole = target;
+            }
+
+            // 使用 XMLHttpRequest 实现真正的流式输出
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/translate', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Accept', 'text/event-stream');
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+            
+            let lastIndex = 0;
+            let buffer = '';  // 缓冲区：处理不完整的行
+            let lastUpdateTime = Date.now();
+
+            xhr.onprogress = function() {
+                // 获取新的数据片段
+                const newData = xhr.responseText.substring(lastIndex);
+                lastIndex = xhr.responseText.length;
+
+                if (!newData) return;
+                
+                // 记录接收时间（用于调试）
+                const now = Date.now();
+                console.log(`[${now - lastUpdateTime}ms] 收到 ${newData.length} 字节`);
+                lastUpdateTime = now;
+
+                // 将新数据添加到缓冲区
+                buffer += newData;
+                
+                // SSE 格式：消息以 \n\n 分隔
+                const messages = buffer.split('\n\n');
+                
+                // 保留最后一个不完整的消息
+                buffer = messages.pop() || '';
+                
+                // 处理每个完整的消息
+                for (const message of messages) {
+                    if (!message.trim()) continue;  // 跳过空消息
+                    
+                    // 忽略注释消息
+                    if (message.trim().startsWith(':')) {
+                        console.log('SSE 连接已建立');
+                        continue;
+                    }
+                    
+                    // 一个SSE消息可能包含多行data:
+                    // 按SSE规范，多个data:行用\n连接
+                    const lines = message.split('\n');
+                    const dataLines = [];
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data:')) {
+                            let content = line.substring(5);  // 去掉 'data:'
+                            if (content.startsWith(' ')) {
+                                content = content.substring(1);  // 去掉空格
+                            }
+                            dataLines.push(content);
+                        }
+                    }
+                    
+                    // 用\n连接所有data:行
+                    const fullData = dataLines.join('\n');
+                    
+                    // 检查是否为结束标记
+                    if (fullData.trim() === '[END]') {
+                        resultStatus.innerHTML = '<span class="status-badge success">翻译完成</span>';
+                        finalFormatResult();
+                        console.log('翻译完成');
+                        
+                        // 保存历史记录
+                        console.log('准备保存历史记录:', {
+                            input: text,
+                            sourceRole: sourceRole,
+                            targetRole: targetRole,
+                            mode: currentMode
+                        });
+                        
+                        addHistory({
+                            input: text,
+                            output: resultBox.textContent,
+                            sourceRole: sourceRole || 'unknown',
+                            targetRole: targetRole || 'unknown'
+                        });
+                        
+                        continue;
+                    }
+                    
+                    // 直接显示（已经是正确格式）
+                    resultBox.textContent += fullData;
+                    
+                    // 自动滚动
+                    resultBox.scrollTop = resultBox.scrollHeight;
+                }
+            };
+
+            xhr.onload = function() {
+                // 恢复按钮
+                translateBtn.disabled = false;
+                translateBtn.textContent = '开始翻译';
+            };
+
+            xhr.onerror = function() {
+                console.error('翻译失败');
+                resultStatus.innerHTML = '<span class="status-badge error">翻译失败</span>';
+                resultBox.textContent = '错误: 网络连接失败\n\n请检查网络连接或稍后重试。';
+                translateBtn.disabled = false;
+                translateBtn.textContent = '开始翻译';
+            };
+
+            // 发送请求
+            xhr.send(JSON.stringify({
+                text: text,
+                source_role: sourceRole,
+                target_role: targetRole
+            }));
+        }
+
+        // 绑定事件
+        translateBtn.addEventListener('click', translate);
+
+        // 支持 Ctrl/Cmd + Enter 快捷键
+        inputText.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                translate();
+            }
+        });
+
+        // ========================================
+        // 历史记录功能
+        // ========================================
+
+        const HISTORY_KEY = 'translation_history';
+        const MAX_HISTORY = 50; // 最多保存 50 条记录
+
+        // 获取历史记录
+        function getHistory() {
+            try {
+                const history = localStorage.getItem(HISTORY_KEY);
+                return history ? JSON.parse(history) : [];
+            } catch (e) {
+                console.error('读取历史记录失败:', e);
+                return [];
+            }
+        }
+
+        // 保存历史记录
+        function saveHistory(history) {
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.error('保存历史记录失败:', e);
+            }
+        }
+
+        // 添加历史记录
+        function addHistory(item) {
+            console.log('addHistory 被调用:', item);
+            let history = getHistory();
+            console.log('当前历史记录数量:', history.length);
+            
+            // 添加到开头
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                mode: currentMode,
+                input: item.input,
+                output: item.output,
+                sourceRole: item.sourceRole,
+                targetRole: item.targetRole
+            };
+            
+            history.unshift(newItem);
+            console.log('新增记录:', newItem);
+            
+            // 限制数量
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+            
+            saveHistory(history);
+            console.log('历史记录已保存，新数量:', history.length);
+        }
+
+        // 删除历史记录
+        function deleteHistory(id) {
+            let history = getHistory();
+            history = history.filter(item => item.id !== id);
+            saveHistory(history);
+            renderHistory();
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem(HISTORY_KEY);
+                renderHistory();
+            }
+        }
+
+        // 格式化时间
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const diff = now - date;
+            
+            // 小于 1 分钟
+            if (diff < 60000) {
+                return '刚刚';
+            }
+            // 小于 1 小时
+            if (diff < 3600000) {
+                return Math.floor(diff / 60000) + ' 分钟前';
+            }
+            // 小于 1 天
+            if (diff < 86400000) {
+                return Math.floor(diff / 3600000) + ' 小时前';
+            }
+            // 小于 7 天
+            if (diff < 604800000) {
+                return Math.floor(diff / 86400000) + ' 天前';
+            }
+            
+            // 超过 7 天，显示具体日期
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        // 获取模式显示名称
+        function getModeName(mode, sourceRole, targetRole) {
+            if (mode === 'auto') {
+                return '自动识别';
+            }
+            const roleMap = {
+                'pm': '产品',
+                'dev': '开发',
+                'operation': '运营',
+                'management': '管理'
+            };
+            return `${roleMap[sourceRole] || sourceRole} → ${roleMap[targetRole] || targetRole}`;
+        }
+
+        // 渲染历史记录
+        function renderHistory() {
+            console.log('renderHistory 被调用');
+            const history = getHistory();
+            console.log('读取到的历史记录:', history);
+            const historyBody = document.getElementById('history-body');
+            const historyCount = document.getElementById('history-count');
+            
+            historyCount.textContent = `共 ${history.length} 条记录`;
+            
+            if (history.length === 0) {
+                console.log('历史记录为空');
+                historyBody.innerHTML = `
+                    <div class="history-empty">
+                        <p>暂无翻译历史</p>
+                        <p style="font-size: 12px; margin-top: 10px;">开始翻译后，历史记录会自动保存</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyBody.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <span class="history-item-mode">${getModeName(item.mode, item.sourceRole, item.targetRole)}</span>
+                        <span class="history-item-time">${formatTime(item.timestamp)}</span>
+                    </div>
+                    <div class="history-item-input">${escapeHtml(item.input)}</div>
+                    <div class="history-item-actions">
+                        <button class="history-item-btn use" onclick="useHistory(${item.id})">使用此输入</button>
+                        <button class="history-item-btn delete" onclick="deleteHistory(${item.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 使用历史记录
+        function useHistory(id) {
+            const history = getHistory();
+            const item = history.find(h => h.id === id);
+            
+            if (item) {
+                // 填充输入框
+                inputText.value = item.input;
+                
+                // 设置模式
+                if (item.mode !== 'auto') {
+                    currentMode = `${item.sourceRole}:${item.targetRole}`;
+                    modeButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.dataset.mode === currentMode) {
+                            btn.classList.add('active');
+                        }
+                    });
+                } else {
+                    currentMode = 'auto';
+                    modeButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.dataset.mode === 'auto') {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+                
+                // 关闭历史记录弹窗
+                closeHistoryModal();
+                
+                // 聚焦输入框
+                inputText.focus();
+            }
+        }
+
+        // 打开历史记录弹窗
+        function openHistoryModal() {
+            console.log('打开历史记录弹窗');
+            const modal = document.getElementById('history-modal');
+            console.log('弹窗元素:', modal);
+            modal.classList.add('show');
+            renderHistory();
+        }
+
+        // 关闭历史记录弹窗
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.remove('show');
+        }
+
+        // 绑定历史记录按钮事件
+        document.getElementById('history-btn').addEventListener('click', openHistoryModal);
+        document.getElementById('history-close').addEventListener('click', closeHistoryModal);
+        document.getElementById('history-clear').addEventListener('click', clearHistory);
+        
+        // 点击弹窗背景关闭
+        document.getElementById('history-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'history-modal') {
+                closeHistoryModal();
+            }
+        });
+
+        // 修改翻译函数，在成功后保存历史记录
+        const originalTranslate = translate;
+        translate = function() {
+            const inputValue = inputText.value.trim();
+            
+            // 调用原始翻译函数
+            originalTranslate();
+            
+            // 翻译成功后保存历史记录
+            // 注意：我们需要在 XHR onload 中保存，这里先保存输入
+            window.lastTranslateInput = {
+                input: inputValue,
+                mode: currentMode,
+                sourceRole: currentMode !== 'auto' ? currentMode.split(':')[0] : null,
+                targetRole: currentMode !== 'auto' ? currentMode.split(':')[1] : null
+            };
+        };
+
+        // 在 XHR onload 中添加保存历史记录的逻辑
+        // 由于我们不能直接修改闭包内的 xhr，这里用一个 hack 的方式
+        // 我们监听 resultBox 的变化来保存历史记录
+        const observer = new MutationObserver(() => {
+            if (resultBox.textContent && resultBox.textContent !== '等待翻译...' && !resultBox.textContent.includes('错误')) {
+                // 如果有待保存的输入，保存历史记录
+                if (window.lastTranslateInput) {
+                    addHistory({
+                        input: window.lastTranslateInput.input,
+                        output: resultBox.textContent,
+                        sourceRole: window.lastTranslateInput.sourceRole,
+                        targetRole: window.lastTranslateInput.targetRole
+                    });
+                    window.lastTranslateInput = null;
+                }
+            }
+        });
+        
+        observer.observe(resultBox, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    </script>
+</body>
+</html>
+

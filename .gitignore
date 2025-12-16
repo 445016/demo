@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+llm_output_*.txt
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Other
+*.bak
+
+# Documentation - 根目录只保留 README.md 和 设计思路.md，其他 .md 文件不提交
+/*.md
+!/README.md
+!/设计思路.md
+
