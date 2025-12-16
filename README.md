@@ -55,10 +55,11 @@
 
 ### 安装步骤
 
-#### 1. 克隆项目（或下载代码）
+#### 1. 克隆项目
 
 ```bash
-cd /path/to/your/workspace
+git clone git@github.com:445016/demo.git
+cd demo
 ```
 
 #### 2. 安装依赖
