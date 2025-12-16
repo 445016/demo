@@ -53,7 +53,28 @@
 - Python 3.11+
 - LLM API Key（支持 Anthropic Claude、OpenAI、智谱 GLM 等）
 
-### 安装步骤
+### 方式一：一键安装（推荐）
+
+```bash
+# 1. 克隆项目
+git clone git@github.com:445016/demo.git
+cd demo
+
+# 2. 运行安装脚本
+./install.sh
+
+# 3. 启动服务
+./start.sh
+```
+
+服务启动后，访问：**http://localhost:8000**
+
+---
+
+### 方式二：手动安装
+
+<details>
+<summary>点击展开手动安装步骤</summary>
 
 #### 1. 克隆项目
 
@@ -62,37 +83,31 @@ git clone git@github.com:445016/demo.git
 cd demo
 ```
 
-#### 2. 安装依赖
+#### 2. 创建虚拟环境
 
-**方式 1：使用 Conda（推荐）**
+**使用 Conda：**
 ```bash
-# 创建环境
 conda create -n comm-translator python=3.11
 conda activate comm-translator
-
-# 安装依赖
-pip install -r requirements.txt
 ```
 
-**方式 2：使用 venv**
+**或使用 venv：**
 ```bash
-# 创建虚拟环境
 python3.11 -m venv venv
 source venv/bin/activate  # macOS/Linux
-# venv\Scripts\activate   # Windows
+```
 
-# 安装依赖
+#### 3. 安装依赖
+
+```bash
 pip install -r requirements.txt
 ```
 
-#### 3. 配置 API Key
+#### 4. 配置 API Key
 
 ```bash
-# 复制配置模板
 cp config.example.env .env
-
-# 编辑 .env 文件
-nano .env  # 或使用你喜欢的编辑器
+nano .env  # 编辑配置文件
 ```
 
 **配置示例：**
@@ -102,25 +117,15 @@ nano .env  # 或使用你喜欢的编辑器
 llm_api_key=your_zhipu_api_key_here
 llm_base_url=https://open.bigmodel.cn/api/anthropic
 llm_model=GLM-4.6
-
-# 或者使用 OpenAI
-# llm_api_key=sk-your_openai_api_key
-# llm_base_url=https://api.openai.com/v1
-# llm_model=gpt-4
-
-# 或者使用 Anthropic Claude
-# llm_api_key=sk-ant-your_claude_api_key
-# llm_base_url=https://api.anthropic.com/v1
-# llm_model=claude-3-5-sonnet-20241022
 ```
 
-#### 4. 运行项目
+#### 5. 运行项目
 
 ```bash
 python main.py
 ```
 
-服务启动后，访问：**http://localhost:8000**
+</details>
 
 ---
 
